@@ -59,3 +59,13 @@ void rosc_set_dormant(void) {
     // Wait for it to become stable once woken up
     while(!(rosc_hw->status & ROSC_STATUS_STABLE_BITS));
 }
+
+void rosc_restart(void)
+{   
+    //Re-enable the rosc
+    rosc_write(&rosc_hw->ctrl, ROSC_CTRL_ENABLE_BITS);
+
+    //Re-enable all system clocks so peripherals and other hardware can be used
+    clocks_hw->sleep_en0 |= ~(0u);
+    clocks_hw->sleep_en1 |= ~(0u);
+}

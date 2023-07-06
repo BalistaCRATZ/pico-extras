@@ -36,13 +36,6 @@ typedef enum {
     DORMANT_SOURCE_ROSC
 } dormant_source_t;
 
-/*! \brief Re-enable the ring oscillator so that the processor cores can wake up after sleep/dormant mode
-    \ingroup hardware_sleep
-
-    This must be called at the end of the sleeping period (e.g., in an interrupt service routine) 
-*/
-void sleep_rosc_restart(void);
-
 /*! \brief Set all clock sources to the the dormant clock source to prepare for sleep.
  *  \ingroup hardware_sleep
  *

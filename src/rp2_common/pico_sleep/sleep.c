@@ -35,16 +35,6 @@ bool dormant_source_valid(dormant_source_t dormant_source) {
     return (dormant_source == DORMANT_SOURCE_XOSC) || (dormant_source == DORMANT_SOURCE_ROSC);
 }
 
-void sleep_rosc_restart()
-{   
-    //Re-enable the rosc
-    rosc_write(&rosc_hw->ctrl, ROSC_CTRL_ENABLE_BITS);
-
-    //Re-enable all system clocks so peripherals and other hardware can be used
-    clocks_hw->sleep_en0 |= ~(0u);
-    clocks_hw->sleep_en1 |= ~(0u);
-}
-
 // In order to go into dormant mode we need to be running from a stoppable clock source:
 // either the xosc or rosc with no PLLs running. This means we disable the USB and ADC clocks
 // and all PLLs
