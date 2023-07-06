@@ -41,7 +41,7 @@ typedef enum {
 
     This must be called at the end of the sleeping period (e.g., in an interrupt service routine) 
 */
-void rosc_restart(void);
+void sleep_rosc_restart(void);
 
 /*! \brief Set all clock sources to the the dormant clock source to prepare for sleep.
  *  \ingroup hardware_sleep
@@ -49,6 +49,14 @@ void rosc_restart(void);
  * \param dormant_source The dormant clock source to use
  */
 void sleep_run_from_dormant_source(dormant_source_t dormant_source);
+
+/*! \brief Run the RTC from an external clock source through GPIO
+ *  \ingroup hardware_sleep
+ *
+ * \param src_hz The frequency of the external clock source
+ * \param gpio_pin The input pin providing the external clock (GP20 or GP22)
+ */
+static inline void rtc_run_from_external_source(uint src_hz, uint gpio_pin);
 
 /*! \brief Set the dormant clock source to be the crystal oscillator
  *  \ingroup hardware_sleep
@@ -74,6 +82,18 @@ static inline void sleep_run_from_rosc(void) {
  */
 void sleep_goto_sleep_until(datetime_t *t, rtc_callback_t callback);
 
+/*! \brief Send system to dormant until the specified time, note RTC must be driven by an external clock
+ *  \ingroup hardware_sleep
+ *
+ * One of the sleep_run_* functions must be called prior to this call
+ *
+ * \param t The time to wake up
+ * \param callback Function to call on wakeup.
+ * \param src_hz The frequency of the external clock source
+ * \param gpio_pin The input pin providing the external clock through GPIO (GP20 or GP22)
+ */
+void sleep_goto_dormant_until(datetime_t *t, rtc_callback_t callback, uint src_hz, uint gpio_pin);
+
 /*! \brief Send system to sleep until the specified GPIO changes
  *  \ingroup hardware_sleep
  *
@@ -83,6 +103,7 @@ void sleep_goto_sleep_until(datetime_t *t, rtc_callback_t callback);
  * \param edge true for leading edge, false for trailing edge
  * \param high true for active high, false for active low
  */
+
 void sleep_goto_dormant_until_pin(uint gpio_pin, bool edge, bool high);
 
 /*! \brief Send system to sleep until a leading high edge is detected on GPIO

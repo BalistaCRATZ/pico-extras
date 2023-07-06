@@ -35,12 +35,12 @@ bool dormant_source_valid(dormant_source_t dormant_source) {
     return (dormant_source == DORMANT_SOURCE_XOSC) || (dormant_source == DORMANT_SOURCE_ROSC);
 }
 
-void rosc_restart()
+void sleep_rosc_restart()
 {   
     //Re-enable the rosc
     rosc_write(&rosc_hw->ctrl, ROSC_CTRL_ENABLE_BITS);
 
-    //Re-enable all system clocks generators so peripherals and other hardware can be used
+    //Re-enable all system clocks so peripherals and other hardware can be used
     clocks_hw->sleep_en0 |= ~(0u);
     clocks_hw->sleep_en1 |= ~(0u);
 }
@@ -112,6 +112,13 @@ void sleep_run_from_dormant_source(dormant_source_t dormant_source) {
     setup_default_uart();
 }
 
+//FIXME: Maybe this should be in hardware/rtc instead?
+static inline void rtc_run_from_external_source(uint src_hz, uint gpio_pin)
+{
+    assert(gpio_pin == 20 | gpio_pin == 22);
+    clock_configure_gpin(clk_rtc, gpio_pin, src_hz, 46875);
+}
+
 // Go to sleep until woken up by the RTC
 void sleep_goto_sleep_until(datetime_t *t, rtc_callback_t callback) {
     // We should have already called the sleep_run_from_dormant_source function
@@ -139,6 +146,28 @@ static void _go_dormant(void) {
     } else {
         rosc_set_dormant();
     }
+}
+
+void sleep_goto_dormant_until(datetime_t *t, rtc_callback_t callback, uint src_hz, uint gpio_pin)   {
+    // We should have already called the sleep_run_from_dormant_source function 
+
+    //The RTC must be run from an external source, since the dormant source will be inactive
+    rtc_run_from_external_source(src_hz, gpio_pin);
+
+    // Turn off all clocks when in sleep mode except for RTC
+    clocks_hw->sleep_en0 = CLOCKS_SLEEP_EN0_CLK_RTC_RTC_BITS;
+    clocks_hw->sleep_en1 = 0x0;
+
+    //Set the RTC interrupt to wake up the proc from dormant mode
+    rtc_set_alarm(t, callback);
+
+    uint save = scb_hw->scr;
+    // Enable deep sleep at the proc
+    scb_hw->scr = save | M0PLUS_SCR_SLEEPDEEP_BITS;
+
+    //Go dormant
+    _go_dormant();
+
 }
 
 void sleep_goto_dormant_until_pin(uint gpio_pin, bool edge, bool high) {
