@@ -102,13 +102,6 @@ void sleep_run_from_dormant_source(dormant_source_t dormant_source) {
     setup_default_uart();
 }
 
-//FIXME: Maybe this should be in hardware/rtc instead?
-static inline void rtc_run_from_external_source(uint src_hz, uint gpio_pin)
-{
-    assert(gpio_pin == 20 | gpio_pin == 22);
-    clock_configure_gpin(clk_rtc, gpio_pin, src_hz, 46875);
-}
-
 // Go to sleep until woken up by the RTC
 void sleep_goto_sleep_until(datetime_t *t, rtc_callback_t callback) {
     // We should have already called the sleep_run_from_dormant_source function

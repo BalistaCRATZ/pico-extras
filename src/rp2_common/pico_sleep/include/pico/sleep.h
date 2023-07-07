@@ -43,14 +43,6 @@ typedef enum {
  */
 void sleep_run_from_dormant_source(dormant_source_t dormant_source);
 
-/*! \brief Run the RTC from an external clock source through GPIO
- *  \ingroup hardware_sleep
- *
- * \param src_hz The frequency of the external clock source
- * \param gpio_pin The input pin providing the external clock (GP20 or GP22)
- */
-static inline void rtc_run_from_external_source(uint src_hz, uint gpio_pin);
-
 /*! \brief Set the dormant clock source to be the crystal oscillator
  *  \ingroup hardware_sleep
  */
